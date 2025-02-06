@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "662266710415",
+    "project_id": "finance-app-d8500",
+    "storage_bucket": "finance-app-d8500.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662266710415:android:a94378bcf67af674e8a3fa",
+        "android_client_info": {
+          "package_name": "com.example.baitaplon_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDflSG8_TktLXJFpZEI9lafuvxWpn__KE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
