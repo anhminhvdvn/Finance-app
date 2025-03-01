@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import '../manage_controller.dart';
 
 // ignore: must_be_immutable
-class CategoryButton extends StatelessWidget {
+class UnselectedCategory extends StatelessWidget {
   String title;
   String category;
-  CategoryButton({
+  UnselectedCategory({
     required this.title,
     required this.category,
     super.key,

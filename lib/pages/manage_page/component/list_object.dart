@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../manage_controller.dart';
 
 class ListObject extends StatelessWidget {
@@ -8,7 +9,7 @@ class ListObject extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ManageController());
+    final controller = Get.find<ManageController>();
     return Obx(() {
       return StreamBuilder(
         stream: controller.taskStream.value,
@@ -32,6 +33,7 @@ class ListObject extends StatelessWidget {
                         itemCount: snapshot.data.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot docSnap = snapshot.data.docs[index];
+                          final formatter = NumberFormat('#,###');
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 5),
@@ -57,10 +59,13 @@ class ListObject extends StatelessWidget {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            docSnap["work"],
+                                            docSnap["work"].length > 14
+                                                ? "${docSnap["work"].substring(0, 14)}..."
+                                                : docSnap["work"],
                                             style: const TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold),
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           Row(
                                             children: [
@@ -72,7 +77,7 @@ class ListObject extends StatelessWidget {
                                                         FontWeight.normal),
                                               ),
                                               Text(
-                                                '${docSnap["amount"]}.000 vnđ',
+                                                '${formatter.format(docSnap["amount"])} vnđ',
                                                 style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.bold,
@@ -87,112 +92,123 @@ class ListObject extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          content: SingleChildScrollView(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                const Padding(
-                                                  padding: EdgeInsets.only(
-                                                      bottom: 15.0),
-                                                  child: Center(
-                                                      child: Text(
-                                                    "Xóa mục này ?",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 20,
-                                                    ),
-                                                  )),
-                                                ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
+                                  Column(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              content: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        controller.removeMethod(
-                                                          docSnap["Id"],
-                                                          controller
-                                                                  .income.value
-                                                              ? "Income"
-                                                              : "Spend",
-                                                        );
-                                                        Get.back();
-                                                      },
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          horizontal: 40.0,
-                                                          vertical: 8.0,
+                                                    const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          bottom: 15.0),
+                                                      child: Center(
+                                                          child: Text(
+                                                        "Xóa mục này ?",
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 20,
                                                         ),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
-                                                            color: Colors
-                                                                .blueAccent),
-                                                        child: const Text(
-                                                          "Xóa",
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 20,
+                                                      )),
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            controller
+                                                                .removeTransaction(
+                                                              docSnap["Id"],
+                                                            );
+                                                            Get.back();
+                                                          },
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                              horizontal: 40.0,
+                                                              vertical: 8.0,
+                                                            ),
+                                                            decoration: BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            30),
+                                                                color: Colors
+                                                                    .blueAccent),
+                                                            child: const Text(
+                                                              "Xóa",
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 20,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 20,
-                                                    ),
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        Get.back();
-                                                      },
-                                                      child: Container(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          horizontal: 40.0,
-                                                          vertical: 8.0,
+                                                        const SizedBox(
+                                                          width: 20,
                                                         ),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
-                                                            color: Colors
-                                                                .grey.shade200),
-                                                        child: const Text(
-                                                          'Hủy',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 20,
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            Get.back();
+                                                          },
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                              horizontal: 40.0,
+                                                              vertical: 8.0,
+                                                            ),
+                                                            decoration: BoxDecoration(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            30),
+                                                                color: Colors
+                                                                    .grey
+                                                                    .shade200),
+                                                            child: const Text(
+                                                              'Hủy',
+                                                              style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 20,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
+                                                      ],
+                                                    )
                                                   ],
-                                                )
-                                              ],
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                          );
+                                        },
+                                        child: const Icon(
+                                          Icons.delete_outline,
+                                          color: Colors.redAccent,
                                         ),
-                                      );
-                                    },
-                                    child: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.redAccent,
-                                    ),
+                                      ),
+                                      Text(
+                                        '${docSnap["date"]}',
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.normal,
+                                            color: Colors.black),
+                                      )
+                                    ],
                                   )
                                 ]),
                           );

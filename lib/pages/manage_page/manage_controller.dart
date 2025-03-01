@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:random_string/random_string.dart';
-
+import 'package:intl/intl.dart';
+import '../../model/transaction_model.dart';
 import '../db_services/database.dart';
-import 'component/float_button.dart';
 
 class ManageController extends GetxController {
   RxBool income = true.obs;
@@ -18,120 +18,133 @@ class ManageController extends GetxController {
   RxDouble totalSpend = 0.0.obs;
   RxDouble balance = 0.0.obs;
 
+  Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
+  final formatter = NumberFormat('#,###');
+
+  final DatabaseService _dbService = DatabaseService();
+
 ////////////////////////////////////////////////////////////////////////////////
+
   @override
   void onInit() {
     ever(totalIncome, (_) => calculateBalance());
     ever(totalSpend, (_) => calculateBalance());
-    // ever(productPrice, (_) => calculateTotalSpent());
-    // ever(quantity, (_) => calculateTotalSpent());
     super.onInit();
   }
 
   @override
   void onReady() {
     getOnTheLoad();
-    // fetchProducts();
     super.onReady();
   }
 
 ////////////////////////////////////////////////////////////////////////////////
-  Future<Stream<QuerySnapshot>> getTask(String task) async {
-    return await FirebaseFirestore.instance
-        .collection(task)
-        .orderBy('amount', descending: true)
-        .snapshots();
-  }
-
-  void selectCategory(String category) {
-    if (category == "Income") {
-      income.value = true;
-      spend.value = false;
-    } else {
-      income.value = false;
-      spend.value = true;
-    }
-    getOnTheLoad();
-  }
 
   Future<void> getOnTheLoad() async {
-    // taskStream.value = await DatabaseService().getTask(
-    taskStream.value = await getTask(
+    taskStream.value = await _dbService.getTransactions(
       income.value ? "Income" : "Spend",
     );
-    await calculateTotalIncome();
-    await calculateTotalSpend();
+    await calculateTotal("Income", totalIncome);
+    await calculateTotal("Spend", totalSpend);
     update();
   }
 
-  tickMethod(String id, String task) async {
-    return await FirebaseFirestore.instance
-        .collection(task)
-        .doc(id)
-        .update({"Yes": true});
-  }
-
-  removeMethod(String id, String task) async {
-    await FirebaseFirestore.instance.collection(task).doc(id).delete();
+  void selectCategory(String category) {
+    income.value = category == "Income";
+    spend.value = !income.value;
     getOnTheLoad();
   }
 
-///////////////////////////////CACULATOR////////////////////////////////////////
-  Future<void> calculateTotalIncome() async {
-    double total = 0; // Sử dụng kiểu double nếu số có thể có phần thập phân
+  Future<void> calculateTotal(String collection, RxDouble total) async {
+    double sum = 0;
     QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('Income').get();
+        await FirebaseFirestore.instance.collection(collection).get();
     for (var doc in snapshot.docs) {
-      double amount =
-          (doc['amount'] ?? 0.0).toDouble(); // Truyền thẳng giá trị là số
-      total += amount;
+      double amount = (doc['amount'] ?? 0.0).toDouble();
+      sum += amount;
     }
-    totalIncome.value = total; // Cập nhật giá trị của totalIncome
-  }
-
-  Future<void> calculateTotalSpend() async {
-    double total = 0;
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('Spend').get();
-    for (var doc in snapshot.docs) {
-      double amount =
-          (doc['amount'] ?? 0.0).toDouble(); // Truyền thẳng giá trị là số
-      total += amount;
-    }
-    totalSpend.value = total; // Cập nhật giá trị của totalSpend
+    total.value = sum;
   }
 
   void calculateBalance() {
     balance.value = totalIncome.value - totalSpend.value;
   }
-////////////////////////////////////////////////////////////////////////////////
 
-  void onTapPopup() {
-    showModalBottomSheet(
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        context: Get.context!,
-        builder: (context) {
-          return FloatButton();
-        });
-    update();
-  }
+  void addTransaction() {
+    if (titleController.text.isEmpty || amountController.text.isEmpty) {
+      Get.snackbar(
+        "Lỗi",
+        "Vui lòng điền đầy đủ thông tin!",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
-  void addToList() {
+    if (selectedDate.value == null) {
+      Get.snackbar(
+        "Lỗi",
+        "Vui lòng chọn ngày!",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     String id = randomAlphaNumeric(10);
-    Map<String, dynamic> userTask = {
-      "work": titleController.text,
-      "amount": int.tryParse(amountController.text) ?? 0.0,
-      "Id": id,
-      "Yes": false,
-    };
+    int parsedAmount = int.parse(amountController.text.replaceAll(',', ''));
+    TransactionModel transaction = TransactionModel(
+      id: id,
+      work: titleController.text,
+      amount: parsedAmount, // Lưu giá trị không có dấu phẩy
+      date: DateFormat('dd/MM/yyyy').format(selectedDate.value!),
+      isConfirmed: false,
+    );
 
-    income.value
-        ? DatabaseService().addInComeTask(userTask, id)
-        : DatabaseService().addSpendTask(userTask, id);
-    titleController.clear();
-    amountController.clear();
+    _dbService.addTransaction(
+      income.value ? "Income" : "Spend",
+      transaction,
+    );
+
+    clearForm();
     Get.back();
     getOnTheLoad();
+  }
+
+  void clearForm() {
+    titleController.clear();
+    amountController.clear();
+    selectedDate.value = null;
+  }
+
+  Future<void> removeTransaction(String id) async {
+    await _dbService.removeTransaction(
+      income.value ? "Income" : "Spend",
+      id,
+    );
+    getOnTheLoad();
+  }
+
+  Future<void> updateTransaction(String id, bool status) async {
+    await _dbService.updateTransaction(
+      income.value ? "Income" : "Spend",
+      id,
+      status,
+    );
+    getOnTheLoad();
+  }
+
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      selectedDate.value = picked;
+    }
   }
 }

@@ -39,6 +39,8 @@ dependencies:
   cloud_firestore: ^4.13.6
   random_string: any
   get: any 
+  intl: any
+  fl_chart: any
 
 dev_dependencies:
   flutter_test:

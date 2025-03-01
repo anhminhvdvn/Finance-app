@@ -8,7 +8,7 @@ class PopupSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ManageController());
+    final controller = Get.find<ManageController>();
     return Container(
       padding: EdgeInsets.all(20),
       decoration: const BoxDecoration(
@@ -114,7 +114,7 @@ class PopupSheet extends StatelessWidget {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    controller.addToList();
+                    controller.addTransaction();
                   },
                   child: const Center(
                     child: Text(
