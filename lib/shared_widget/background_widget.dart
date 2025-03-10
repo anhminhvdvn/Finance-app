@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
-class BackGroundWiget extends StatelessWidget {
+class BackGroundWidget extends StatelessWidget {
   Widget child;
-  BackGroundWiget({required this.child, super.key});
+  BackGroundWidget({required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 20),
+      // padding: const EdgeInsets.only(top: 20),
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       decoration: const BoxDecoration(

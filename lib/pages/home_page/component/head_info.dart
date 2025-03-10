@@ -8,7 +8,7 @@ class HeadInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HomeController>();
+    final HomeController controller = Get.find<HomeController>();
     return Obx(
       () => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,9 +49,36 @@ class HeadInfo extends StatelessWidget {
               ),
             ],
           ),
-          const Icon(
-            CupertinoIcons.gear_solid,
-            color: Colors.white,
+          GestureDetector(
+            onTap: () => showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text("Chỉnh sửa tên"),
+                content: TextField(
+                  controller: controller.nameController,
+                  decoration: InputDecoration(labelText: "Nhập tên mới"),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text("Hủy"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // if (controller.nameController.text.isNotEmpty) {
+                      //   controller.addUser();
+                      //   Get.back();
+                      // }
+                    },
+                    child: Text("Lưu"),
+                  ),
+                ],
+              ),
+            ),
+            child: const Icon(
+              CupertinoIcons.gear_solid,
+              color: Colors.white,
+            ),
           )
         ],
       ),

@@ -11,13 +11,18 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(
-    GetMaterialApp(
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: "/",
-      // initialBinding: BindingsBuilder(() {
-      //   Get.put<BaseProvider>(BaseProvider()); // Khởi tạo BaseProvider
-      // }),
       getPages: [
         GetPage(
           name: "/",
@@ -25,32 +30,6 @@ void main() async {
           binding: NavigateBarBinding(),
         ),
       ],
-    ),
-  );
+    );
+  }
 }
-
-// void main() async {
-
-//   Get.put(DashboardController());
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   // This widget is the root of your application.
-//   @override
-//   Widget build(BuildContext context) {
-//     return GetMaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       title: 'Flutter Demo',
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(
-//           seedColor: Colors.deepPurple,
-//         ),
-//         useMaterial3: true,
-//       ),
-//       home: NavigateBar(),
-//     );
-//   }
-// }

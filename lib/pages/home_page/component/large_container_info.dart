@@ -35,12 +35,12 @@ class LargeContainerInfo extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "${formatter.format(controller.managecontroller.balance.value)} VNĐ",
+                    "${formatter.format(controller.balance.value)} VNĐ",
                     style: TextStyle(
-                      color: controller.managecontroller.balance < 0
+                      color: controller.balance < 0
                           ? Colors.red // Màu đỏ khi balance < 0
                           // ignore: unrelated_type_equality_checks
-                          : controller.managecontroller.balance == 0
+                          : controller.balance == 0
                               ? Colors.white // Màu trắng khi balance == 0
                               : Colors.green, // Màu xanh lá khi balance > 0
                       fontSize: 40,
@@ -84,7 +84,7 @@ class LargeContainerInfo extends StatelessWidget {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 Text(
-                                  "${formatter.format(controller.managecontroller.totalIncome.value)} VNĐ ",
+                                  "${formatter.format(controller.totalIncome.value)} VNĐ ",
                                   style: const TextStyle(
                                     color: Colors.green,
                                     fontSize: 14,
@@ -122,7 +122,7 @@ class LargeContainerInfo extends StatelessWidget {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 Text(
-                                  "${formatter.format(controller.managecontroller.totalSpend.value)} VNĐ ",
+                                  "${formatter.format(controller.totalExpend.value)} VNĐ ",
                                   style: const TextStyle(
                                     color: Colors.red,
                                     fontSize: 14,

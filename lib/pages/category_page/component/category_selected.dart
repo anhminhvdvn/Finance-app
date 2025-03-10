@@ -17,14 +17,14 @@ class SelectedCategory extends StatelessWidget {
         elevation: 5,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.greenAccent.shade200,
+            color: Color.fromARGB(255, 6, 47, 192),
           ),
           child: Center(
             child: Text(
               title,
               style: const TextStyle(
                 fontSize: 20,
-                color: Colors.black,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),

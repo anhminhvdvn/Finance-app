@@ -1,17 +1,57 @@
-import 'package:baitaplon_mobile/pages/manage_page/manage_controller.dart';
-import 'package:baitaplon_mobile/shared_widget/custom_format.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:baitaplon_mobile/pages/category_page/category_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
-class FloatButton extends StatelessWidget {
-  const FloatButton({super.key});
+class addCategoryButton extends StatelessWidget {
+  const addCategoryButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ManageController>();
+    final controller = Get.find<CategoryController>();
+    void _showIconPicker(BuildContext context) {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            padding: EdgeInsets.all(16),
+            height: 300,
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4, // 4 cột trong lưới
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              itemCount: controller.iconList.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () {
+                    controller.selectedIcon.value = controller.iconList[index];
+                    Get.back(); // Đóng modal
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: controller.selectedIcon.value ==
+                                controller.iconList[index]
+                            ? Colors.blue
+                            : Colors.grey,
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      controller.iconList[index],
+                      style: TextStyle(fontSize: 30),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      );
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -26,7 +66,7 @@ class FloatButton extends StatelessWidget {
             context: context,
             builder: (context) => WillPopScope(
               onWillPop: () async {
-                controller.clearForm(); // Xóa dữ liệu khi ấn "Back"
+                controller.clearForm();
                 return true;
               },
               child: AlertDialog(
@@ -72,88 +112,35 @@ class FloatButton extends StatelessWidget {
                           controller: controller.titleController,
                           decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: "Nội dung",
+                            hintText: 'Tên mục',
                           ),
                           keyboardType: TextInputType.text,
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        "Số tiền:",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      const SizedBox(height: 5),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.black,
-                            width: 2.0,
+                      GestureDetector(
+                        onTap: () => _showIconPicker(context),
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Chọn Icon:",
+                                  style: TextStyle(fontSize: 16)),
+                              Obx(() => Text(controller.selectedIcon.value,
+                                  style: TextStyle(fontSize: 30))),
+                            ],
                           ),
                         ),
-                        child: TextField(
-                          controller: controller.amountController,
-                          keyboardType:
-                              TextInputType.number, // Chỉ hiển thị bàn phím số
-                          inputFormatters: [
-                            FilteringTextInputFormatter
-                                .digitsOnly, // Chỉ cho phép nhập số
-                            NumberInputFormatter(), // Định dạng số với dấu phẩy
-                          ],
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            labelText: 'Số tiền',
-                            hintText: 'Nhập số tiền...',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Ngày:",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          const Icon(
-                            CupertinoIcons.calendar,
-                            size: 50,
-                          ),
-                          const SizedBox(width: 10),
-                          Obx(() => GestureDetector(
-                                onTap: () => controller.selectDate(context),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10.0,
-                                    vertical: 15.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.black,
-                                      width: 2.0,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    controller.selectedDate.value == null
-                                        ? "Chọn ngày"
-                                        : DateFormat('dd/MM/yyyy').format(
-                                            controller.selectedDate.value!),
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              )),
-                        ],
                       ),
                       const SizedBox(height: 20),
                       Center(
                         child: GestureDetector(
-                          onTap: () {
-                            controller.addTransaction();
-                          },
+                          onTap: () => controller.addCategory(),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 10),

@@ -1,11 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../home_page/home_controller.dart';
-import 'dashboard_controller.dart'; // Import Controller
+import 'dashboard_controller.dart';
 
 class NavigateBar extends GetView<DashboardController> {
   NavigateBar({super.key});
-  final HomeController homeController = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +23,8 @@ class NavigateBar extends GetView<DashboardController> {
               label: 'Trang chủ',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_balance_wallet_outlined),
+              icon: Icon(CupertinoIcons.chart_bar_alt_fill),
               label: 'Quản lí',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history),
-              label: 'Lịch sử',
             ),
           ],
         ),

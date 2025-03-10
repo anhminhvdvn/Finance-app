@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../manage_page/manage_controller.dart';
-
 class HomeController extends GetxController {
-  final managecontroller = Get.find<ManageController>();
-
-  RxString userName = "Phạm Ngọc Minh".obs;
+  RxString userName = 'Phạm Ngọc Minh'.obs;
+  RxDouble totalIncome = 0.0.obs;
+  RxDouble totalExpend = 0.0.obs;
+  RxDouble balance = 0.0.obs;
+  TextEditingController nameController = TextEditingController();
+  final firestore = FirebaseFirestore.instance;
 
   @override
   void onInit() {
@@ -16,32 +18,77 @@ class HomeController extends GetxController {
   @override
   void onReady() {
     getMonthlyBalance();
+    calculateTotalMoney();
     super.onReady();
   }
 
-  Future<List<Map<String, dynamic>>> getMonthlyBalance() async {
-    final firestore = FirebaseFirestore.instance;
+  /// 🔹 **Tính tổng toàn bộ số tiền của tất cả Categories**
+  Future<void> calculateTotalMoney() async {
+    double incomeSum = 0.0;
+    double expendSum = 0.0;
 
-    // Lấy dữ liệu từ Firestore
-    final incomeSnapshot = await firestore.collection('Income').get();
-    final spendSnapshot = await firestore.collection('Spend').get();
+    // Lấy danh sách tất cả các categories
+    QuerySnapshot categorySnapshot =
+        await firestore.collection('categories').get();
 
-    // Chuyển dữ liệu thành Map dựa trên tháng
-    Map<String, int> incomeByMonth = {};
-    Map<String, int> spendByMonth = {};
+    for (var category in categorySnapshot.docs) {
+      String categoryId = category.id;
+      String type = category['type']; // "Income" hoặc "Expend"
 
-    for (var doc in incomeSnapshot.docs) {
-      final date = doc['date'] as String;
-      final amount = doc['amount'] as int;
-      final month = date.substring(3); // Lấy "MM/YYYY" từ ngày
-      incomeByMonth[month] = (incomeByMonth[month] ?? 0) + amount;
+      // Lấy tất cả các items thuộc category này
+      QuerySnapshot itemSnapshot = await firestore
+          .collection('items')
+          .where('categoryId', isEqualTo: categoryId)
+          .get();
+
+      for (var item in itemSnapshot.docs) {
+        double amount = (item['amount'] ?? 0.0).toDouble();
+
+        if (type == "Income") {
+          incomeSum += amount;
+        } else if (type == "Expend") {
+          expendSum += amount;
+        }
+      }
     }
 
-    for (var doc in spendSnapshot.docs) {
+    totalIncome.value = incomeSum;
+    totalExpend.value = expendSum;
+    calculateBalance(); // Cập nhật balance sau khi tính tổng
+  }
+
+  /// 🔹 **Tính số dư (Balance)**
+  void calculateBalance() {
+    balance.value = totalIncome.value - totalExpend.value;
+  }
+
+  /// 🔹 **Tính tổng thu nhập và chi tiêu theo tháng**
+  Future<List<Map<String, dynamic>>> getMonthlyBalance() async {
+    // Lấy dữ liệu từ Firestore
+    final itemSnapshot = await firestore.collection('items').get();
+
+    // Chuyển dữ liệu thành Map dựa trên tháng
+    Map<String, double> incomeByMonth = {};
+    Map<String, double> spendByMonth = {};
+
+    for (var doc in itemSnapshot.docs) {
       final date = doc['date'] as String;
-      final amount = doc['amount'] as int;
+      final amount = (doc['amount'] ?? 0.0).toDouble();
+      final categoryId = doc['categoryId'];
+
+      // Lấy loại category (Income hoặc Expend)
+      final categoryDoc =
+          await firestore.collection('categories').doc(categoryId).get();
+      if (!categoryDoc.exists) continue;
+      final categoryType = categoryDoc['type']; // "Income" hoặc "Expend"
+
       final month = date.substring(3); // Lấy "MM/YYYY" từ ngày
-      spendByMonth[month] = (spendByMonth[month] ?? 0) + amount;
+
+      if (categoryType == "Income") {
+        incomeByMonth[month] = (incomeByMonth[month] ?? 0) + amount;
+      } else {
+        spendByMonth[month] = (spendByMonth[month] ?? 0) + amount;
+      }
     }
 
     // Tổng hợp dữ liệu từ cả income và spend
